@@ -1,0 +1,89 @@
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Anime Finder</title>
+        <link rel="stylesheet" href="style.css">
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Jura:wght@300..700&display=swap" rel="stylesheet">
+    </head>
+    <body>
+        <h1 class="header">Anime Finder</h1>
+        <div class="outer-div">    
+            <div class="box">
+                <!-- Add an id to the form for JavaScript targeting -->
+                <form id="anime-form">
+                    <!-- Add an id to the input for easy reference -->
+                    <input type="text" id="mood" class="input-field" placeholder="Enter Your Mood">
+                    <input type="submit" class="button" value="Find Anime">
+                </form>
+            </div>
+        </div>
+        
+        <!-- This is where the anime results will be displayed -->
+        <div class="anime-list" id="animeList"></div>
+
+        <script>
+                                    // Function to fetch anime based on mood, including the poster
+                    async function getAnimeBasedOnMood(mood) {
+                        const baseUrl = "https://api.jikan.moe/v4/";
+                        const endpoint = "anime";
+                        const url = `${baseUrl}${endpoint}?q=${mood}&limit=10`; // Adjust the limit as needed
+
+                        try {
+                            const response = await fetch(url);
+                            const data = await response.json();
+
+                            if (data.data && data.data.length > 0) {
+                                return data.data; // Return the array of anime
+                            } else {
+                                return [];
+                            }
+                        } catch (error) {
+                            console.error("Error fetching data:", error);
+                            return [];
+                        }
+                    }
+
+                    // Handling the form submission
+                    document.getElementById("anime-form").addEventListener("submit", async function(event) {
+                        event.preventDefault(); // Prevent the form from submitting the traditional way
+
+                        const mood = document.getElementById("mood").value;
+                        const animeList = await getAnimeBasedOnMood(mood);
+                        const animeListContainer = document.getElementById("animeList");
+
+                        // Hide the box div
+                        const box = document.querySelector(".box");
+                        box.style.display = "none";
+
+                        // Clear previous results
+                        animeListContainer.innerHTML = "";
+
+                            if (animeList.length > 0) {
+                                const ul = document.createElement("ul");
+                            
+                                animeList.forEach(anime => {
+                                    const li = document.createElement("li");
+                                    li.className = "anime-item"; // Apply the anime-item class
+                                    const img = document.createElement("img");
+                                    img.src = anime.images.jpg.large_image_url; // Assuming the image URL is available in this property
+                                    const title = document.createElement("div");
+                                    title.textContent = anime.title;
+                            
+                                    li.appendChild(img);
+                                    li.appendChild(title);
+                                    ul.appendChild(li);
+                                });
+                            
+                                animeListContainer.appendChild(ul);
+                            } else {
+                                animeListContainer.textContent = "Oops, we couldn't find any anime based on your mood.";
+                            }
+                    });
+
+        </script>
+        
+    </body>
+</html>
